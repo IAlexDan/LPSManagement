@@ -1,0 +1,80 @@
+﻿@inject EmployeClient EmployeClient
+@inject IJSRuntime Js
+@inject NavigationManager NavitationManager
+
+
+
+@if (Employes == null)
+{
+    <Spinner></Spinner>
+}
+else if (!Employes.Any())
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Expire days</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var employe in Employes)
+            {
+
+                <tr>
+                    <td>@employe.FullName</td>
+                    <td>@employe.PhoneNumber</td>
+                    <td>@DaysToExpire(employe.StartDate.Date)</td>
+
+                    <td>
+                        <a class="btn btn-success" href="employe/edit/@employe.Id">Edit</a>
+                        <button class="btn btn-danger" @onclick="() => OnDeleted.InvokeAsync(employe.Id)">Delete</button>
+                    </td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+}
+
+
+@code{
+    [Parameter] public List<Employe> Employes { get; set; }
+    [Parameter] public EventCallback<int> OnDeleted { get; set; }
+
+    async Task Delete(int employeId)
+    {
+        var employe = Employes.First(x => x.Id == employeId);
+        if (await Js.InvokeAsync<bool>("confirm", $"Do you want to delete {employe.FirstName}'s Record?"))
+        {
+            await EmployeClient.DeleteEmployeAsync(employeId);
+            await OnInitializedAsync();
+            NavitationManager.NavigateTo("/employes", true);
+        }
+    }
+
+    public string DaysToExpire(DateTime date)
+    {
+        var daysToExpire = (date.Date.AddDays(365) - DateTime.UtcNow.Date).TotalDays;
+        if (daysToExpire > 0)
+            return $"expire in {daysToExpire} days";
+
+        else if (daysToExpire < 0)
+            return $"is {Math.Abs(daysToExpire)} days expired ";
+
+        else if (daysToExpire < 0 && daysToExpire > -2)
+            return $"is {Math.Abs(daysToExpire)} day expired ";
+
+        else if (daysToExpire > 0 && daysToExpire < 2)
+            return $"expire in {daysToExpire} day";
+
+        else return "it expires today";
+    }
+
+}

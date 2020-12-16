@@ -1,0 +1,32 @@
+﻿@page "/employe/edit/{employeId:int}"
+@inject EmployeClient EmployeClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime Js
+
+<h3>Edit</h3>
+<a class="nav-link" href="/employes">Back to  Full List</a>
+
+<Form Employe="@employe" ButtonText="Update Employe" OnValidSubmit="@EditEmploye" isSubmiting="@isSubmiting"></Form>
+
+@code{
+    Employe employe = new Employe();
+    [Parameter] public int employeId { get; set; }
+
+    bool isSubmiting;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        employe = await EmployeClient.GetEmployeByIdAsync(employeId);
+    }
+
+    async Task EditEmploye()
+    {
+        if (await Js.InvokeAsync<bool>("confirm", $"Do you want to update {employe.FullName}"))
+        {
+            await EmployeClient.UpdateEmployeAsync(employe);
+            await Js.InvokeVoidAsync("alert", $"Updated Succsesfully!");
+            NavigationManager.NavigateTo("employes");
+        }
+
+    }
+}

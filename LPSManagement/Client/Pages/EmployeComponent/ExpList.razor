@@ -1,0 +1,112 @@
+﻿@page "/employes/explist"
+@inject EmployeClient EmployeClient
+@inject IJSRuntime Js
+
+<h3>@Title</h3>
+<div class="container">
+    <div class="nav">
+        <div class="nav-item">
+            <CreateButton></CreateButton>
+        </div>
+        <div class="nav-item">
+            <a class="btn btn-link" href="/employes">
+                Full List
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="btn btn-link" href="/employes/explist">
+                Expire List
+            </a>
+        </div>
+        <div class="nav-item">
+            <Search OnSearchChanged="@SearchChanged"></Search>
+        </div>
+        @*<div class="nav-item">
+            <Sort OnSortChanged="@SortChanged" />
+        </div>*@
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col">
+        <List Employes="Employes" OnDeleted="DeleteEmploye"></List>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        @if (isSubmiting == true)
+        {
+            <Paginations MetaData="@MetaData" Spread="2" SelectedPage="@SelectedPage"></Paginations>
+        }
+    </div>
+</div>
+
+
+
+
+
+
+@code {
+    public List<Employe> Employes { get; set; }
+    public MetaData MetaData { get; set; } = new MetaData();
+    private EmployeParameters _employeParameters = new EmployeParameters();
+    private bool isSubmiting;
+    public string Title { get; set; }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _employeParameters.ExpDateSearch = "expdate";
+        await GetEmployes();
+    }
+
+    public async Task DeleteEmploye(int employeId)
+    {
+        var employe = Employes.First(x => x.Id == employeId);
+        if (await Js.InvokeAsync<bool>("confirm", $"Do you want to delete {employe.FullName}'s Record?"))
+        {
+            await EmployeClient.DeleteEmployeAsync(employeId);
+            _employeParameters.ExpDateSearch = "expdate";
+            _employeParameters.PageNumber = 1;
+            await GetEmployes();
+        }
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        _employeParameters.PageNumber = page;
+        _employeParameters.ExpDateSearch = "expdate";
+        await GetEmployes();
+
+    }
+
+    private async Task GetEmployes()
+    {
+        isSubmiting = true;
+        _employeParameters.ExpDateSearch = "expdate";
+        var pagingResponse = await EmployeClient.GetEmployesAsync(_employeParameters);
+        Employes = pagingResponse.Items;
+        MetaData = pagingResponse.MetaData;
+
+        Title = "Exp list";
+    }
+
+    private async Task SearchChanged(string searchTerm)
+    {
+        Console.WriteLine(searchTerm);
+        _employeParameters.PageNumber = 1;
+        _employeParameters.SearchTerm = searchTerm;
+        _employeParameters.ExpDateSearch = "expdate";
+        await GetEmployes();
+    }
+
+    //private async Task SortChanged(string orderBy)
+    //{
+    //    Console.WriteLine(orderBy);
+    //    _productParameters.OrderBy = orderBy;
+    //    await GetEmployes();
+    //}
+}

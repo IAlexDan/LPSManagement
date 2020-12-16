@@ -1,0 +1,28 @@
+﻿@page "/employe/create"
+@inject EmployeClient EmployeClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime Js
+
+<h3>Create Employe</h3>
+<a  class="nav-link" href="/employes">Back to Full List</a>
+
+<Form Employe="@Employe" ButtonText="Create Employe" OnValidSubmit="@CreateEmploye" isSubmiting="@isSubmiting"></Form>
+
+@code {
+    Employe Employe = new Employe();
+    bool isSubmiting;
+
+    async Task CreateEmploye()
+    {
+        if (await Js.InvokeAsync<bool>("confirm", $"Do you want to Create {Employe.FullName}"))
+        {
+            isSubmiting = true;
+
+            await EmployeClient.CreateEmployeAsync(Employe);
+            NavigationManager.NavigateTo("employes");
+        }
+
+    }
+
+
+}
