@@ -1,5 +1,7 @@
 using LPSManagement.Client.Pages.EmployeComponent;
+using LPSManagement.Client.Pages.SendMail;
 using LPSManagement.Client.Services;
+using LPSManagement.Server.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,7 @@ namespace LPSManagement.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddHttpClient<EmployeClient>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+            builder.Services.AddHttpClient<SendEmailClient>(mail => mail.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
             await builder.Build().RunAsync();
         }

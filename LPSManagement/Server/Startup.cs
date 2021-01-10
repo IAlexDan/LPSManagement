@@ -1,6 +1,8 @@
 using LPSManagement.Server.Data;
 using LPSManagement.Server.Models;
 using LPSManagement.Server.Repository;
+using LPSManagement.Server.Services;
+using LPSManagement.Server.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -49,9 +51,13 @@ namespace LPSManagement.Server
                     return Task.CompletedTask;
                 };
             });
+
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddScoped<IEmployeRepository, EmployRepository>();
+            services.AddTransient<IMailService, MailService>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();

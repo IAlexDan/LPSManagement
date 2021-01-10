@@ -1,0 +1,59 @@
+﻿@page "/mail";
+@inject IJSRuntime Js;
+@inject SendEmailClient sendMail;
+@inject NavigationManager navigationManager;
+
+<h3>Send Mail</h3>
+
+<EditForm Model="@mailRequest" OnValidSubmit="@SendMail">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <div class="form-group">
+        <label>Mail to:</label>
+        <div>
+            <InputText @bind-Value="mailRequest.ToEmail"></InputText>
+            <ValidationMessage For="(() => mailRequest.ToEmail)"></ValidationMessage>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Subject: </label>
+        <div>
+            <InputText @bind-Value="mailRequest.Subject"></InputText>
+            <ValidationMessage For="(() => mailRequest.Subject)"></ValidationMessage>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Message: </label>
+        <div>
+            <InputText @bind-Value="mailRequest.Body"></InputText>
+            <ValidationMessage For="(() => mailRequest.Body)"></ValidationMessage>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success" disabled="@isSubmiting">
+        @if (isSubmiting)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span class="sr-only">Loading...</span>
+        }
+        Send Mail
+    </button>
+
+</EditForm>
+
+@code {
+    MailRequest mailRequest = new MailRequest();
+    bool isSubmiting;
+
+    async Task SendMail()
+    {
+        if (await Js.InvokeAsync<bool>("confirm", $"Do you want to send mail to:{mailRequest.ToEmail}"))
+        {
+            isSubmiting = true;
+
+            await sendMail.SendEmail(mailRequest);
+            navigationManager.NavigateTo("employes");
+
+        }
+    }
+}
