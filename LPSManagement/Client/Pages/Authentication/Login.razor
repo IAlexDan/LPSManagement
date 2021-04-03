@@ -23,7 +23,7 @@
         <label class="form-check-label" for="inputRememberMe">Remember Me</label>
     </div>
 
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <button class="btn btn-lg btn-primary btn-block" type="submit" disabled="@isSubmitting">Sign in</button>
     <label class="text-danger">@error</label>
 
     <NavLink href="register">
@@ -36,10 +36,12 @@
 @code{
     LoginRequest loginRequest { get; set; } = new LoginRequest();
     string error { get; set; }
+    bool isSubmitting { get; set; }
 
     async Task OnSubmit()
     {
         error = null;
+        isSubmitting = true;
         try
         {
             await authStateProvider.Login(loginRequest);
